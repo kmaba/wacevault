@@ -1,0 +1,32 @@
+name: Cleanup Repository
+
+on:
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Delete unwanted directories
+        run: |
+          shopt -s extglob
+          rm -rf !(applications|methods|specialist|chemistry|physics|.git|.github)
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          if [ -n "$(git status --porcelain)" ]; then
+            git add -A
+            git commit -m "Remove all directories except core subjects"
+            git push
+          else
+            echo "No changes to commit"
+          fi
